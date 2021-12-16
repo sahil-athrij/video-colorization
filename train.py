@@ -38,7 +38,7 @@ class MyDataset(Dataset):
 
     def __getitem__(self, idx):
         im = self.X[idx]
-        label = self.Y[idx]
+        label = self.Y[idx] - self.Y[idx - (idx > 0)]
         im_prev = im if idx == 0 else self.X[idx - 1]
 
         if self.transformX is not None:
@@ -87,7 +87,7 @@ def train(pix, generator, discriminator, batch_size=1):
             output_fake = discriminator(output)
 
             FALSE = torch.ones([1, 1, 256, 256], dtype=torch.float).cuda()
-            loss_gen = generator_loss(output- pix1, label-label_1) + discriminator_loss(output_fake, FALSE)
+            loss_gen = generator_loss(output - pix1, label) + discriminator_loss(output_fake, FALSE)
             loss_gen.backward()
             generator_optimiser.step()
 
