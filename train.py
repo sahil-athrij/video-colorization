@@ -19,8 +19,8 @@ class MyDataset(Dataset):
         x = []
         y = []
 
-        for img in listdir(root):
-            image = cv2.imread(f"{root}/{img}")
+        for i in range(len(listdir(root))):
+            image = cv2.imread(f"{root}/{i}.png")
             original, image_processed = preprocess_img(image)
 
             x.append(image_processed)
@@ -34,7 +34,7 @@ class MyDataset(Dataset):
 
     def __getitem__(self, idx):
         im = self.X[idx]
-        label = self.Y[idx]
+        label = torch.cat((self.Y[idx-1 if idx != 0 else 0], self.Y[idx]), dim=1)[0]
         im_prev = im if idx == 0 else self.X[idx - 1]
 
         if self.transformX is not None:
@@ -46,19 +46,22 @@ class MyDataset(Dataset):
         return (im_prev, im), label
 
 
-def train(pix, generator, batch_size=8):
+def train(pix, generator, batch_size=1):
     train_loader = torch.utils.data.DataLoader(MyDataset(root="input/x"), batch_size=batch_size, shuffle=True,
-                                               num_workers=2, drop_last=True)
+                                               num_workers=0, drop_last=True)
 
     generator_optimiser = optim.SGD(generator.parameters(), lr=0.03)
     generator_loss = nn.MSELoss()
 
     for epoch in range(5):
         for images, label in train_loader:
+            img = images[0][0]
+            prev = images[1][0]
+
             generator_optimiser.zero_grad()
 
-            pix1 = pix(images[0])
-            pix2 = pix(images[1])
+            pix1 = pix(prev)
+            pix2 = pix(img)
 
             output = generator(pix1, pix2)
 
