@@ -51,20 +51,26 @@ def train(pix, generator, discriminator, batch_size=1):
     train_loader = torch.utils.data.DataLoader(MyDataset(root="input/x"), batch_size=batch_size, shuffle=True,
                                                num_workers=0, drop_last=True)
 
+    pix.cuda()
+    generator.cuda()
+    discriminator.cuda()
+
     generator_optimiser = optim.Adam(generator.parameters(), lr=0.03)
     discriminator_optimiser = optim.Adam(discriminator.parameters(), lr=0.03)
 
     generator_loss = nn.MSELoss()
     discriminator_loss = nn.MSELoss()
 
-    TRUE = torch.zeros([1, 1, 256, 256], dtype=torch.float)
-    FALSE = torch.ones([1, 1, 256, 256], dtype=torch.float)
+    TRUE = torch.zeros([1, 1, 256, 256], dtype=torch.float).cuda()
+    FALSE = torch.ones([1, 1, 256, 256], dtype=torch.float).cuda()
+
+    device = torch.device('cuda:0')
 
     for epoch in range(5):
         total_loss = 0
         for images, label in train_loader:
-            img = images[0][0]
-            prev = images[1][0]
+            img = images[0].to(device)[0]
+            prev = images[1].to(device)[0]
 
             generator_optimiser.zero_grad()
             discriminator_optimiser.zero_grad()
@@ -89,7 +95,7 @@ def train(pix, generator, discriminator, batch_size=1):
 
             total_loss += loss_gen
 
-        print(total_loss)
+        print(f"Epoch {epoch} Loss {total_loss/len(train_loader)}")
 
 
 if __name__ == "__main__":
