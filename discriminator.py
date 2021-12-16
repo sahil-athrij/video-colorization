@@ -1,5 +1,4 @@
 import torch.nn as nn
-import functools
 
 
 class PixelDiscriminator(nn.Module):
