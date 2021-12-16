@@ -201,10 +201,10 @@ def preprocess_img_ab(img_rgb_orig, HW=(256, 256), resample=3):
     img_lab_rs = color.rgb2lab(img_rgb_rs)
 
     img_l_orig = img_lab_orig[:, :, 1: 3]
-    img_l_rs = img_lab_rs[:, :, 0]
+    img_l_rs = img_lab_rs[:, :, 1:3]
 
-    tens_orig_l = torch.Tensor(img_l_orig)[None, None, :, :]
-    tens_rs_l = torch.Tensor(img_l_rs)[None, None, :, :]
+    tens_orig_l = torch.Tensor(img_l_orig)[None, :, :]
+    tens_rs_l = torch.Tensor(img_l_rs)[None, :, :]
 
     return tens_orig_l, tens_rs_l
 
